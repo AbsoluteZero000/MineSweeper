@@ -1,40 +1,55 @@
 import random
 
 class MineSweeper:
-    def __init__(self, x, y, bombs):
-        self.x = x
-        self.y = y
-        self.bombs = bombs
-        self.ms_map = [['N' for _ in range(x)] for _ in range(y)]
-        for i in range(bombs):
-            while True:
-                rand_x = random.randint(0, x-1)
-                rand_y = random.randint(0, y-1)
-                if self.ms_map[rand_y][rand_x] != 'B':
-                    self.ms_map[rand_y][rand_x] = 'B'
-                    break
-        for i in range(x):
-            for j in range(y):
-                if(self.ms_map[i][j] != 'B'):
-                    self.ms_map[i][j] = self.countBombs(i,j)
+    def __init__(self, width, height, num_bombs):
+        self.width = width
+        self.height = height
+        self.num_bombs = num_bombs
+        self.grid = [[' ' for _ in range(width)] for _ in range(height)]
+        self._place_bombs()
+        self._calculate_adjacent_bombs()
 
-    def countBombs(self, x, y):
+    def _place_bombs(self):
+        placed_bombs = 0
+        while placed_bombs < self.num_bombs:
+            rand_x = random.randint(0, self.width - 1)
+            rand_y = random.randint(0, self.height - 1)
+            if self.grid[rand_y][rand_x] != 'B':
+                self.grid[rand_y][rand_x] = 'B'
+                placed_bombs += 1
+
+    def _calculate_adjacent_bombs(self):
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.grid[y][x] != 'B':
+                    self.grid[y][x] = self._count_adjacent_bombs(x, y)
+
+    def _count_adjacent_bombs(self, x, y):
         count = 0
-        for i in range(x-1, x+2):
-            for j in range(y-1, y+2):
-                if i >= 0 and i < self.x and j >= 0 and j < self.y and self.ms_map[i][j] == 'B':
+        for dx in range(-1, 2):
+            for dy in range(-1, 2):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < self.width and 0 <= ny < self.height and self.grid[ny][nx] == 'B':
                     count += 1
         return count
 
-    def printMap(self):
-        for i in self.ms_map:
-            for j in i:
-                print(j, end=' ')
-            print()
+    def display_grid(self):
+        for row in self.grid:
+            print(' '.join(str(cell) for cell in row))
 
-x = int(input("enter the width of the map (min 5): "))
-y = int(input("enter the height of the map (min 5): "))
-bombs = int(input("enter the number of bombs (min 1): "))
-ms = MineSweeper(x, y, bombs)
+def get_valid_input(prompt, min_value):
+    while True:
+        try:
+            value = int(input(prompt))
+            if value >= min_value:
+                return value
+            print(f"Please enter a value greater than or equal to {min_value}.")
+        except ValueError:
+            print("Invalid input. Please enter an integer.")
 
-ms.printMap()
+width = get_valid_input("Enter the width of the map (min 5): ", 5)
+height = get_valid_input("Enter the height of the map (min 5): ", 5)
+num_bombs = get_valid_input(f"Enter the number of bombs (min 1, max({width*height-1}): ", 1)
+ms = MineSweeper(width, height, num_bombs)
+
+ms.display_grid()
