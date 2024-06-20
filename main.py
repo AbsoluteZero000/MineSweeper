@@ -37,13 +37,17 @@ class MineSweeper:
         for row in self.grid:
             print(' '.join(str(cell) for cell in row))
 
-def get_valid_input(prompt, min_value):
+def get_valid_input(prompt, min_value, max_value=None):
     while True:
         try:
             value = int(input(prompt))
-            if value >= min_value:
-                return value
-            print(f"Please enter a value greater than or equal to {min_value}.")
+            if value < min_value:
+                print(f"Please enter a value greater than or equal to {min_value}.")
+                continue
+            if max_value is not None and value > max_value:
+                print(f"Please enter a value less than or equal to {max_value}.")
+                continue
+            return value
         except ValueError:
             print("Invalid input. Please enter an integer.")
 
