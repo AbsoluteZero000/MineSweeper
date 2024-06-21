@@ -6,15 +6,14 @@ class MineSweeper:
         self.height = height
         self.num_bombs = num_bombs
         self.grid = [[' ' for _ in range(width)] for _ in range(height)]
-        self._place_bombs()
-        self._calculate_adjacent_bombs()
 
-    def _place_bombs(self):
+
+    def _place_bombs(self, x, y):
         placed_bombs = 0
         while placed_bombs < self.num_bombs:
             rand_x = random.randint(0, self.width - 1)
             rand_y = random.randint(0, self.height - 1)
-            if self.grid[rand_y][rand_x] != 'B':
+            if self.grid[rand_y][rand_x] != 'B' and (rand_x != x and rand_y != y):
                 self.grid[rand_y][rand_x] = 'B'
                 placed_bombs += 1
 
@@ -36,7 +35,25 @@ class MineSweeper:
     def display_grid(self):
         for row in self.grid:
             print(' '.join(str(cell) for cell in row))
+    
+    def game_loop(self):
+        x = get_valid_input("Enter the x-coordinate: ", 0, self.width - 1)
+        y = get_valid_input("Enter the y-coordinate: ", 0, self.height - 1)
+        self._place_bombs(x, y)
+        self._calculate_adjacent_bombs()
+        self.display_grid()
 
+        while True:
+            x = get_valid_input("Enter the x-coordinate: ", 0, self.width - 1)
+            y = get_valid_input("Enter the y-coordinate: ", 0, self.height - 1)
+            self.display_grid()
+
+            if self.grid[y][x] == 'B':
+                print("YOU LOSE!")
+                self.display_grid()
+                return
+            if self.grid[y][x] == 0:
+                self._reveal_adjacent_cells(x, y)
 def get_valid_input(prompt, min_value, max_value=None):
     while True:
         try:
@@ -56,4 +73,4 @@ height = get_valid_input("Enter the height of the map (min 5): ", 5)
 num_bombs = get_valid_input(f"Enter the number of bombs (min 1, max({width*height-1}): ", 1)
 ms = MineSweeper(width, height, num_bombs)
 
-ms.display_grid()
+ms.game_loop()
